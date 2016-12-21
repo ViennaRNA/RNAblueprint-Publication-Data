@@ -10,13 +10,15 @@ check_package <- function(x) {
 check_package("Hmisc")
 check_package("gtools")
 check_package("getopt")
+check_package("corrplot")
 
 # Option Parsing
 spec = matrix(c(
     'prefix','p', 1, "character",
     'suffix','s', 1, "character",
     'directory', 'd', 1, "character",
-    'help', 'h', 0, "logical"
+    'help', 'h', 0, "logical",
+    'corrplots', 'c', 0, "logical"
 ), byrow=TRUE, ncol=4);
 opt = getopt(spec);
 
@@ -46,6 +48,9 @@ evaluate <- function(file) {
   l <- max(data$seq_length)
   mean_nom <- mean(data$num_mutations)
   median_nom <- median(data$num_mutations)
+  mean_constructing <- mean(data$construction_time)
+  mean_sampling <- mean(data$sample_time)
+  max_dimensions <- max(data$max_dimensions)
 
   all_deltas <- data[,grep("^diff_eos_mfe_", colnames(data))] # find all entries concerning diff_eos
  
@@ -54,7 +59,7 @@ evaluate <- function(file) {
 
   probs <- data[,grep("^prob_", colnames(data))]
   row_sum_prob <- c(rowSums(probs))
-  
+
   # find min d2 and min d1, if there are more than one min d2
   deltas <- data.frame(d1_min_row, d2_min_row, row_sum_prob) 
 
@@ -91,7 +96,7 @@ evaluate <- function(file) {
   #mean_prob <- mean(sum_prob)
   #median_prob <- median(sum_prob)
   
-  result <-data.frame(RNA, l, sum_n, d1, d2, mean_d1, median_d1, mean_d2, median_d2, mean_nom, median_nom, sum_prob, num_of_structs)
+  result <-data.frame(RNA, l, sum_n, d1, d2, mean_d1, median_d1, mean_d2, median_d2, mean_nom, median_nom, sum_prob, mean_constructing, mean_sampling, max_dimensions, num_of_structs)
   return(result)
 }
 
@@ -172,6 +177,7 @@ new_names <- sapply(new_names, function(x) {
   x <- gsub(pattern="_", replacement = " ", x)
   x <- gsub(pattern="median", replacement = "$\\\\tilde x$", x)
   x <- gsub(pattern="mean", replacement = "$\\\\mu$", x)
+  x <- gsub(pattern="sum", replacement = "$\\\\sum$", x)
 })
 
 colnames(all_infiles) <- new_names
@@ -185,3 +191,41 @@ format_numbers[c(1: (2 + num_of_structs))] <- 0
 
 # generate latex table
 latex.default(all_infiles, cdec=format_numbers, rowname=NULL, n.rgroup=c(NROW(all_infiles) - 2, 2), na.blank=TRUE, booktabs=FALSE, table.env=FALSE, center="none", file="", title="") 
+
+
+# also generate correlation plot showing the sample times and complexity of the problem
+if (!is.null(opt$corrplots)) {
+    readData <- function(file) {
+      data <- read.csv(file, header = TRUE, sep=";", dec = ".", comment.char='#')
+      data <- data[grep("^max_dimensions|^nos|time$|num_mutations|score|max_specials|num_cc", colnames(data), value=TRUE)]
+      return(data)
+    }
+
+    all_data <- lapply(infiles, 
+                          function(file) { 
+                            tryCatch(readData(file), error = function(e) { stop(paste("Error in file ", file, ":", e$message)) }) 
+                          }
+    )
+    all_data <- do.call(rbind,all_data)
+
+    svg(paste(opt$directory, ".corr.svg", sep=""), width=6, height=6)
+    corrplot(cor(all_data), method="number")
+    dev.off()
+
+    svg(paste(opt$directory, ".nom_samptime.svg", sep=""), width=6, height=6)
+    ggplot(all_data, aes(x=num_mutations, y=sample_time)) + 
+    ggtitle("Number of Mutations vs Sampling time") +
+    scale_x_continuous(name="Number of Mutations") + 
+    scale_y_continuous(name="Sampling Time") + 
+    geom_point(shape=2) + 
+    geom_smooth(method=lm)
+    dev.off()
+    svg(paste(opt$directory, ".maxdim_consttime.svg", sep=""), width=6, height=6)
+    ggplot(all_data, aes(x=num_mutations, y=construction_time)) + 
+    ggtitle("Maximal Table Dimesions vs Constructing time") +
+    scale_x_continuous(name="Maximal Table Dimesions") +
+    scale_y_continuous(name="Constructing Time") + 
+    geom_point(shape=2) +
+    geom_smooth(method=lm)
+    dev.off()
+}

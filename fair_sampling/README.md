@@ -18,7 +18,7 @@ Fair sampling histogram
 
 To generate the histogram plot run the according script:
 ``` bash
-python solution_analysis.py -f small.10000.out.gz
+python solution_analysis.py small.10000.out.gz
 ```
 
 For small examples it is possible to run the `fair_sampling.py` script
@@ -33,8 +33,8 @@ Fair sampling expectation values
 To generate the expectation values plot, collect the csv output generated
 by the `solution_analysis.py` script for different amounts of sampled
 sequences into a common csv file, such as the example `data.csv` file.
-Then save as `data.csv` and call the script:
+(You might need to calculate normlized values yourself)
 
 ```bash
-python plot_xy.py
+python plot_xy.py -f data.csv
 ```

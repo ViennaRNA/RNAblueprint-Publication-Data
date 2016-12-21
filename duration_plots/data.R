@@ -73,14 +73,16 @@ cdata$rel_max <- with(cdata, (max) / (max_score))
 head(cdata)
 
 svg(paste(opt$directory, ".score.svg", sep=""), width=6, height=4)
-#ggplot(cdata, aes(num_mutations,rel_score, colour = mode, shape=mode)) + 
+ggplot(cdata, aes(num_mutations, rel_score, colour = mode, shape=mode), linetype=2) + 
+geom_ribbon(aes(x = num_mutations, ymax = rel_score+rel_sd, ymin = rel_score-rel_sd, fill=mode), alpha = 0.2, linetype=0) + 
 #stat_smooth() +
-#geom_point() + 
-qplot(num_mutations, rel_score, colour = mode, shape=mode, data = cdata) +
+geom_point() + 
+#geom_point(aes(y=rel_min)) + 
+#qplot(num_mutations, rel_score, colour = mode, shape=mode, data = cdata) +
 #geom_errorbar(data=cdata, mapping=aes(x=num_mutations, ymin = rel_min, ymax = rel_max), width=0.1) +
-scale_x_log10(limits = c(0.2, 600000), breaks = c(1,10,100, 1000, 10000, 100000)) +
+scale_x_log10(limits = c(0.2, 100000), breaks = c(1,10,100, 1000, 10000, 100000)) +
 #coord_trans(x="log10") +
-scale_y_continuous(limits = c(0, 1)) +
+scale_y_continuous(limits = c(0, 1.35)) +
 geom_line() +
 ylab("relative mean Score") +
 xlab("Number of Sampled Sequences") +

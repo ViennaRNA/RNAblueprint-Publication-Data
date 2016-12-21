@@ -19,7 +19,7 @@ def main():
     parser.add_argument("-i", "--input", default=False, action='store_true', help='Read custom structures and sequence constraints from stdin')
     parser.add_argument("-q", "--nupack", default=False, action='store_true', help='Use Nupack instead of the ViennaRNA package (for pseudoknots)')
     parser.add_argument("-n", "--number", type=int, default=100, help='Number of designs to generate')
-    parser.add_argument("-e", "--exit", type=int, default=100000, help='Exit optimization run if no better solution is aquired after (exit) trials.')
+    parser.add_argument("-s", "--stop", type=int, default=100000, help='Stop optimization run if no better solution is aquired after (stop) trials.')
     parser.add_argument("-m", "--mode", type=str, default='sample_global', help='Mode for getting a new sequence: sample, sample_local, sample_global, sample_strelem')
     parser.add_argument("-k", "--kill", type=int, default=0, help='Timeout value of graph construction in seconds. (default: infinite)')
     parser.add_argument("-g", "--graphml", type=str, default=None, help='Write a graphml file with the given filename.')
@@ -28,7 +28,7 @@ def main():
     parser.add_argument("-d", "--debug", default=False, action='store_true', help='Show debug information of library')
     args = parser.parse_args()
 
-    print("# Options: number={0:d}, exit={1:d}, mode={2:}, nupack={3:}".format(args.number, args.exit, args.mode, str(args.nupack)))
+    print("# Options: number={0:d}, stop={1:d}, mode={2:}, nupack={3:}".format(args.number, args.stop, args.mode, str(args.nupack)))
     rbp.initialize_library(args.debug, args.kill)
     # define structures
     structures = []
@@ -104,7 +104,7 @@ def main():
                         graph_properties.keys()))
         
         samplings = []
-        endpoint = math.log(args.exit, 10)
+        endpoint = math.log(args.stop, 10)
         for i in range(0, int(endpoint)):
             samplings.append(10**i - sum(samplings))
             samplings.append(2*10**i - sum(samplings))
@@ -162,7 +162,7 @@ def fixed_optimization(dg, design, objective_function=calculate_objective, weigh
     :param design: Design object containing the sequence and structures
     :param objective_function: function which takes a design object and returns a score for evaluation
     :param weight: float specifying the weight of the difference part of the objective function
-    :param exit: Number of unsuccessful new sequences before exiting the optimization
+    :param stop: Number of unsuccessful new sequences before stoping the optimization
     :param mode: String defining the sampling mode: sample, sample_global, sample_local
     :param progress: Whether or not to print the progress to the console
     :param return: Optimization score reached for the final sequence
