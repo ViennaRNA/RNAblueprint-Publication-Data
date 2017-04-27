@@ -3,10 +3,7 @@ RNAblueprint Publication Data
 
 This is a script collection for Benchmarks and Plots published in:
 
-Stefan Hammer, Birgit Tschiatschek, Christoph Flamm, Ivo L. Hofacker and Sven Findeiß. Submitted 2016. "Flexible and universal multiple target nucleic acid sequence design" Journal: Pages. doi: DOI.
-
-The publication is still in progress. We will update this information as soon as a preprint is available online!
-These scripts mainly depend on RNAblueprint, PyDesign, the ViennaRNA package and NUPACK.
+Stefan Hammer, Birgit Tschiatschek, Christoph Flamm, Ivo L. Hofacker, and Sven Findeiß. “RNAblueprint: Flexible Multiple Target Nucleic Acid Sequence Design.” Bioinformatics, 2017. [doi:10.1093/bioinformatics/btx263](https://doi.org/10.1093/bioinformatics/btx263).
 
 Benchmark Inputs
 ----------------
